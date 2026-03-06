@@ -452,10 +452,9 @@ function TransactionsContent() {
           )}
         </div>
 
-        {/* Filter pills - horizontally scrollable on mobile */}
-        <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-          <div className="flex items-center gap-2 pb-1">
-            {/* Category dropdown */}
+        {/* Filter pills */}
+        <div className="flex flex-wrap items-center gap-2">
+            {/* Category dropdown - outside overflow container to prevent clipping */}
             <div className="relative" data-category-dropdown>
               <button
                 onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
@@ -468,11 +467,11 @@ function TransactionsContent() {
               >
                 <Tag className="h-3.5 w-3.5" />
                 {categoryDropdownLabel}
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                <ChevronDown className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', categoryDropdownOpen && 'rotate-180')} />
               </button>
 
               {categoryDropdownOpen && (
-                <div className="absolute left-0 top-full z-40 mt-1 max-h-64 w-56 overflow-y-auto rounded-xl border border-border bg-card p-1 shadow-lg">
+                <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-56 overflow-y-auto rounded-xl border border-border bg-card p-1 shadow-lg">
                   <button
                     onClick={() => {
                       setCategoryFilter('all')
@@ -603,7 +602,6 @@ function TransactionsContent() {
                 placeholder="Hasta"
               />
             </div>
-          </div>
         </div>
       </div>
 

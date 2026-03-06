@@ -279,22 +279,28 @@ export interface CategoryExpense {
   transactionCount: number
 }
 
-export function useCategoryBreakdown(month?: string) {
+export function useCategoryBreakdown(month?: string, rangeMonths: number = 1) {
   const supabase = createClient()
   const targetMonth = month ?? format(new Date(), 'yyyy-MM')
 
-  return useQuery<CategoryExpense[]>({
-    queryKey: [...dashboardKeys.all, 'category-breakdown', targetMonth],
-    queryFn: async () => {
-      const monthStart = `${targetMonth}-01`
-      const monthEnd = format(endOfMonth(new Date(monthStart)), 'yyyy-MM-dd')
+  // Calculate date range based on rangeMonths
+  const targetDate = new Date(`${targetMonth}-01`)
+  const rangeStartDate = rangeMonths > 1
+    ? subMonths(targetDate, rangeMonths - 1)
+    : targetDate
 
-      // Fetch expense transactions with their categories for the month
+  const dateFrom = format(rangeStartDate, 'yyyy-MM-dd')
+  const dateTo = format(endOfMonth(targetDate), 'yyyy-MM-dd')
+
+  return useQuery<CategoryExpense[]>({
+    queryKey: [...dashboardKeys.all, 'category-breakdown', targetMonth, rangeMonths],
+    queryFn: async () => {
+      // Fetch expense transactions with their categories for the date range
       const { data, error } = await supabase
         .from('transactions')
         .select('amount, category_id, categories(id, name, color)')
-        .gte('date', monthStart)
-        .lte('date', monthEnd)
+        .gte('date', dateFrom)
+        .lte('date', dateTo)
         .lt('amount', 0) // expenses only
         .eq('is_excluded', false)
         .not('category_id', 'is', null)

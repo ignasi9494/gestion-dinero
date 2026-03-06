@@ -133,7 +133,7 @@ export default function DashboardPage() {
   // ── Data fetching ─────────────────────────────────────────────────
   const { data: kpis, isLoading: kpisLoading } = useKPIs(currentMonth)
   const { data: categoryData, isLoading: categoryLoading } =
-    useCategoryBreakdown(currentMonth)
+    useCategoryBreakdown(currentMonth, rangeMonths)
   const { data: monthlySummaries, isLoading: monthlyLoading } =
     useMonthlySummaries(Math.max(rangeMonths, 12))
   const { data: balanceData, isLoading: balanceLoading } =
