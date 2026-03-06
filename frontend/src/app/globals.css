@@ -203,3 +203,18 @@ body {
 .pb-safe {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
+
+/* FAB position accounting for mobile nav + safe area */
+.fab-safe {
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 768px) {
+  .fab-safe {
+    bottom: 1.5rem;
+  }
+}
+
+/* Modal footer safe area padding for iPhone */
+.modal-footer-safe {
+  padding-bottom: max(1rem, calc(1rem + env(safe-area-inset-bottom)));
+}

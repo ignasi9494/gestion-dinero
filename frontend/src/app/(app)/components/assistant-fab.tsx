@@ -11,9 +11,9 @@ export function AssistantFAB() {
   return (
     <button
       onClick={toggle}
-      className={`fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-primary/40 active:scale-95 md:bottom-6 md:right-6 ${
+      className={`fixed right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-primary/40 active:scale-95 md:bottom-6 md:right-6 ${
         hasUnreadInsight ? "assistant-pulse" : ""
-      } gradient-primary`}
+      } gradient-primary fab-safe`}
       aria-label="Abrir asistente financiero"
     >
       <Sparkles className="h-6 w-6 text-white" />

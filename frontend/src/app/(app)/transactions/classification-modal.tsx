@@ -148,20 +148,21 @@ export function ClassificationModal({
         })
       } else if (transaction) {
         // Single transaction classification
+        // Always update the current transaction first
+        await updateCategory.mutateAsync({
+          transactionId: transaction.id,
+          categoryId: selectedCategoryId,
+          classificationSource: 'manual',
+        })
+
         if (applyToSimilar && transaction.concept_normalized) {
-          // Create a rule and apply to all matching transactions
+          // Also create/update rule and apply to all matching transactions
           await createRuleAndApply.mutateAsync({
             pattern: transaction.concept_normalized,
             match_type: 'exact',
             category_id: selectedCategoryId,
             priority: 10,
             is_auto: false,
-          })
-        } else {
-          await updateCategory.mutateAsync({
-            transactionId: transaction.id,
-            categoryId: selectedCategoryId,
-            classificationSource: 'manual',
           })
         }
       }
@@ -339,7 +340,7 @@ export function ClassificationModal({
         </div>
 
         {/* Footer with toggle and button */}
-        <div className="border-t border-border px-5 py-4">
+        <div className="border-t border-border px-5 pt-4 modal-footer-safe">
           {/* Apply to similar toggle - only for single transaction */}
           {!isBulk && transaction && (
             <label className="mb-4 flex cursor-pointer items-center justify-between">

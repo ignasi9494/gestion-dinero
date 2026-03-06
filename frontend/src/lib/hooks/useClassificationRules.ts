@@ -139,10 +139,13 @@ export function useCreateRuleAndApply() {
       } = await supabase.auth.getUser()
       if (!user) throw new Error('No autenticado')
 
-      // 1. Create the rule
+      // 1. Create or update the rule (upsert to handle existing rules)
       const { data: newRule, error: ruleError } = await supabase
         .from('classification_rules')
-        .insert({ ...rule, user_id: user.id })
+        .upsert(
+          { ...rule, user_id: user.id },
+          { onConflict: 'user_id,pattern,match_type' }
+        )
         .select()
         .single()
 
