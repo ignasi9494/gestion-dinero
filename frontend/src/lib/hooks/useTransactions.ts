@@ -13,6 +13,8 @@ export interface TransactionFilters {
   search?: string
   classificationSource?: Transaction['classification_source'] | 'all'
   isExcluded?: boolean
+  amountMin?: number
+  amountMax?: number
   page?: number
   pageSize?: number
 }
@@ -45,6 +47,8 @@ export function useTransactions(filters: TransactionFilters = {}) {
     search,
     classificationSource = 'all',
     isExcluded,
+    amountMin,
+    amountMax,
     page = 1,
     pageSize = 50,
   } = filters
@@ -78,6 +82,12 @@ export function useTransactions(filters: TransactionFilters = {}) {
       }
       if (isExcluded !== undefined) {
         query = query.eq('is_excluded', isExcluded)
+      }
+      if (amountMin !== undefined) {
+        query = query.gte('amount', amountMin)
+      }
+      if (amountMax !== undefined) {
+        query = query.lte('amount', amountMax)
       }
 
       // Pagination

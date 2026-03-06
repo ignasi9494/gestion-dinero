@@ -4,7 +4,6 @@ import { Suspense, useState, useMemo, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   Search,
-  ChevronDown,
   Loader2,
   AlertTriangle,
   Inbox,
@@ -12,7 +11,6 @@ import {
   X,
   Sparkles,
   CheckCircle2,
-  XCircle,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDateShort } from '@/lib/utils'
 import {
@@ -24,12 +22,8 @@ import { useCategories } from '@/lib/hooks/useCategories'
 import { useUIStore } from '@/lib/stores/ui-store'
 import { useAIClassifyBatch, useAIClassifyStats } from '@/lib/hooks/useAIClassify'
 import { ClassificationModal, CategoryIcon } from './classification-modal'
+import { AdvancedFilters, type TypeFilter, type ClassFilter } from './components/advanced-filters'
 import type { Transaction, Category } from '@/lib/supabase/types'
-
-// ─── Types ───────────────────────────────────────────────────────────
-
-type TypeFilter = 'all' | 'expense' | 'income'
-type ClassFilter = 'all' | 'classified' | 'unclassified'
 
 // ─── Date group helpers ──────────────────────────────────────────────
 
@@ -103,6 +97,10 @@ function TransactionsContent() {
   )
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [amountMin, setAmountMin] = useState('')
+  const [amountMax, setAmountMax] = useState('')
+  const [debouncedAmountMin, setDebouncedAmountMin] = useState('')
+  const [debouncedAmountMax, setDebouncedAmountMax] = useState('')
   const [page, setPage] = useState(1)
 
   // Debounce search input
@@ -113,6 +111,16 @@ function TransactionsContent() {
     }, 300)
     return () => clearTimeout(timer)
   }, [search])
+
+  // Debounce amount filters
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAmountMin(amountMin)
+      setDebouncedAmountMax(amountMax)
+      setPage(1)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [amountMin, amountMax])
 
   // Reset page when filters change
   useEffect(() => {
@@ -129,6 +137,16 @@ function TransactionsContent() {
     if (debouncedSearch) f.search = debouncedSearch
     if (dateFrom) f.dateFrom = dateFrom
     if (dateTo) f.dateTo = dateTo
+
+    // Amount range filters
+    if (debouncedAmountMin) {
+      const val = parseFloat(debouncedAmountMin)
+      if (!isNaN(val)) f.amountMin = val
+    }
+    if (debouncedAmountMax) {
+      const val = parseFloat(debouncedAmountMax)
+      if (!isNaN(val)) f.amountMax = val
+    }
 
     // Category filter
     if (categoryFilter === 'unclassified') {
@@ -149,7 +167,7 @@ function TransactionsContent() {
     }
 
     return f
-  }, [debouncedSearch, categoryFilter, classFilter, dateFrom, dateTo, page])
+  }, [debouncedSearch, categoryFilter, classFilter, dateFrom, dateTo, debouncedAmountMin, debouncedAmountMax, page])
 
   // ── Data fetching ────────────────────────────────────────────────
   const { data: categoriesData = [] } = useCategories()
@@ -245,21 +263,7 @@ function TransactionsContent() {
     await classify()
   }, [classify])
 
-  // ── Dropdown state ───────────────────────────────────────────────
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false)
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!categoryDropdownOpen) return
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('[data-category-dropdown]')) {
-        setCategoryDropdownOpen(false)
-      }
-    }
-    document.addEventListener('click', handler)
-    return () => document.removeEventListener('click', handler)
-  }, [categoryDropdownOpen])
+  // (Category dropdown state is now managed inside AdvancedFilters component)
 
   // ── Filter helpers ───────────────────────────────────────────────
   const hasActiveFilters =
@@ -268,7 +272,18 @@ function TransactionsContent() {
     typeFilter !== 'all' ||
     classFilter !== 'all' ||
     dateFrom !== '' ||
-    dateTo !== ''
+    dateTo !== '' ||
+    amountMin !== '' ||
+    amountMax !== ''
+
+  // Count of active advanced filters (excluding search which is always visible)
+  const activeFilterCount = [
+    categoryFilter !== 'all',
+    typeFilter !== 'all',
+    classFilter !== 'all',
+    dateFrom !== '' || dateTo !== '',
+    amountMin !== '' || amountMax !== '',
+  ].filter(Boolean).length
 
   const clearAllFilters = useCallback(() => {
     setSearch('')
@@ -278,16 +293,12 @@ function TransactionsContent() {
     setClassFilter('all')
     setDateFrom('')
     setDateTo('')
+    setAmountMin('')
+    setAmountMax('')
+    setDebouncedAmountMin('')
+    setDebouncedAmountMax('')
     setPage(1)
   }, [])
-
-  // Category dropdown label
-  const categoryDropdownLabel = useMemo(() => {
-    if (categoryFilter === 'all') return 'Categoria'
-    if (categoryFilter === 'unclassified') return 'Sin clasificar'
-    const cat = categoryMap.get(categoryFilter)
-    return cat?.name ?? 'Categoria'
-  }, [categoryFilter, categoryMap])
 
   // ─── Render ──────────────────────────────────────────────────────
   return (
@@ -452,157 +463,26 @@ function TransactionsContent() {
           )}
         </div>
 
-        {/* Filter pills */}
-        <div className="flex flex-wrap items-center gap-2">
-            {/* Category dropdown - outside overflow container to prevent clipping */}
-            <div className="relative" data-category-dropdown>
-              <button
-                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                className={cn(
-                  'flex h-9 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 text-sm font-medium transition-colors',
-                  categoryFilter !== 'all'
-                    ? 'border-primary/30 bg-accent text-accent-foreground'
-                    : 'border-border bg-card text-foreground hover:bg-muted'
-                )}
-              >
-                <Tag className="h-3.5 w-3.5" />
-                {categoryDropdownLabel}
-                <ChevronDown className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', categoryDropdownOpen && 'rotate-180')} />
-              </button>
-
-              {categoryDropdownOpen && (
-                <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-56 overflow-y-auto rounded-xl border border-border bg-card p-1 shadow-lg">
-                  <button
-                    onClick={() => {
-                      setCategoryFilter('all')
-                      setCategoryDropdownOpen(false)
-                    }}
-                    className={cn(
-                      'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                      categoryFilter === 'all'
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-foreground hover:bg-muted'
-                    )}
-                  >
-                    Todas las categorias
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCategoryFilter('unclassified')
-                      setCategoryDropdownOpen(false)
-                    }}
-                    className={cn(
-                      'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                      categoryFilter === 'unclassified'
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-foreground hover:bg-muted'
-                    )}
-                  >
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                    Sin clasificar
-                  </button>
-                  <div className="my-1 h-px bg-border" />
-                  {categoriesData.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setCategoryFilter(cat.id)
-                        setCategoryDropdownOpen(false)
-                      }}
-                      className={cn(
-                        'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                        categoryFilter === cat.id
-                          ? 'bg-accent text-accent-foreground'
-                          : 'text-foreground hover:bg-muted'
-                      )}
-                    >
-                      <div
-                        className="flex h-5 w-5 items-center justify-center rounded"
-                        style={{
-                          backgroundColor: `${cat.color || '#6366f1'}20`,
-                          color: cat.color || '#6366f1',
-                        }}
-                      >
-                        <CategoryIcon iconName={cat.icon} className="h-3 w-3" />
-                      </div>
-                      <span className="truncate">{cat.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Type filter */}
-            <div className="flex h-9 overflow-hidden rounded-lg border border-border">
-              {(['all', 'expense', 'income'] as TypeFilter[]).map((type) => {
-                const labels: Record<TypeFilter, string> = {
-                  all: 'Todos',
-                  expense: 'Gastos',
-                  income: 'Ingresos',
-                }
-                return (
-                  <button
-                    key={type}
-                    onClick={() => setTypeFilter(type)}
-                    className={cn(
-                      'whitespace-nowrap px-3 text-sm font-medium transition-colors',
-                      typeFilter === type
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card text-foreground hover:bg-muted'
-                    )}
-                  >
-                    {labels[type]}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Classification filter */}
-            <div className="flex h-9 overflow-hidden rounded-lg border border-border">
-              {(['all', 'classified', 'unclassified'] as ClassFilter[]).map(
-                (cls) => {
-                  const labels: Record<ClassFilter, string> = {
-                    all: 'Todos',
-                    classified: 'Clasificados',
-                    unclassified: 'Sin clasificar',
-                  }
-                  return (
-                    <button
-                      key={cls}
-                      onClick={() => setClassFilter(cls)}
-                      className={cn(
-                        'whitespace-nowrap px-3 text-sm font-medium transition-colors',
-                        classFilter === cls
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-card text-foreground hover:bg-muted'
-                      )}
-                    >
-                      {labels[cls]}
-                    </button>
-                  )
-                }
-              )}
-            </div>
-
-            {/* Date range */}
-            <div className="flex items-center gap-1.5">
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="h-9 rounded-lg border border-border bg-card px-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Desde"
-              />
-              <span className="text-xs text-muted-foreground">-</span>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="h-9 rounded-lg border border-border bg-card px-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Hasta"
-              />
-            </div>
-        </div>
+        {/* Advanced filters with date chips */}
+        <AdvancedFilters
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          classFilter={classFilter}
+          setClassFilter={setClassFilter}
+          dateFrom={dateFrom}
+          setDateFrom={setDateFrom}
+          dateTo={dateTo}
+          setDateTo={setDateTo}
+          amountMin={amountMin}
+          setAmountMin={setAmountMin}
+          amountMax={amountMax}
+          setAmountMax={setAmountMax}
+          categories={categoriesData}
+          categoryMap={categoryMap}
+          activeFilterCount={activeFilterCount}
+        />
       </div>
 
       {/* Bulk actions bar */}

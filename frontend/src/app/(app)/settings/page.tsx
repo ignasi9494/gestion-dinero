@@ -19,6 +19,8 @@ import {
 import { cn, formatDate } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
+import { BudgetManager } from './components/budget-manager'
+import { NotificationSettings } from './components/notification-settings'
 import type { Import, Profile } from '@/lib/supabase/types'
 
 // ─── Main Page ───────────────────────────────────────────────────────
@@ -46,6 +48,12 @@ export default function SettingsPage() {
 
       {/* Profile Section */}
       <ProfileSection userId={user?.id ?? null} email={user?.email ?? null} />
+
+      {/* Notification Settings */}
+      <NotificationSettings />
+
+      {/* Budget Manager */}
+      <BudgetManager />
 
       {/* Data Management Section */}
       <DataManagementSection />

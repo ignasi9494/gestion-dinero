@@ -8,11 +8,14 @@ import {
   Upload,
   Tags,
   Settings,
+  Target,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AssistantFAB } from "./components/assistant-fab";
 import { AssistantPanel } from "./components/assistant-panel";
+import { OfflineIndicator } from "./components/offline-indicator";
+import { CelebrationOverlay } from "./components/celebration-overlay";
 
 interface NavItem {
   label: string;
@@ -25,6 +28,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Movimientos", href: "/transactions", icon: List },
   { label: "Importar", href: "/upload", icon: Upload, accent: true },
+  { label: "Objetivos", href: "/goals", icon: Target },
   { label: "Categorias", href: "/categories", icon: Tags },
   { label: "Ajustes", href: "/settings", icon: Settings },
 ];
@@ -171,9 +175,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
 
+      {/* ── Offline Indicator ─────────────────────────────── */}
+      <OfflineIndicator />
+
       {/* ── AI Assistant ──────────────────────────────────── */}
       <AssistantFAB />
       <AssistantPanel />
+
+      {/* ── Celebration Overlay ─────────────────────────────── */}
+      <CelebrationOverlay />
     </div>
   );
 }

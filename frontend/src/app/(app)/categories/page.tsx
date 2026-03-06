@@ -491,7 +491,7 @@ function CategoryModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/40 transition-opacity"
+        className="fixed inset-0 z-[60] bg-black/40 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -499,7 +499,7 @@ function CategoryModal({
       {/* Modal */}
       <div
         className={cn(
-          'fixed z-50 flex flex-col bg-white shadow-2xl dark:bg-gray-800',
+          'fixed z-[60] flex flex-col bg-white shadow-2xl dark:bg-gray-800',
           'inset-x-0 bottom-0 max-h-[90vh] rounded-t-2xl',
           'md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2',
           'md:max-h-[85vh] md:w-full md:max-w-lg md:rounded-2xl'
@@ -636,7 +636,7 @@ function CategoryModal({
                   )}
                   style={{
                     backgroundColor: c,
-                    ...(color === c ? { ringColor: c } : {}),
+                    ...(color === c ? { '--tw-ring-color': c } as React.CSSProperties : {}),
                   }}
                   title={c}
                 >
@@ -648,7 +648,7 @@ function CategoryModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 px-5 py-4 dark:border-gray-700">
+        <div className="border-t border-gray-100 px-5 py-4 modal-footer-safe dark:border-gray-700">
           <div className="flex gap-3">
             <button
               onClick={onClose}
@@ -719,7 +719,7 @@ function RuleModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/40 transition-opacity"
+        className="fixed inset-0 z-[60] bg-black/40 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -727,7 +727,7 @@ function RuleModal({
       {/* Modal */}
       <div
         className={cn(
-          'fixed z-50 flex flex-col bg-white shadow-2xl dark:bg-gray-800',
+          'fixed z-[60] flex flex-col bg-white shadow-2xl dark:bg-gray-800',
           'inset-x-0 bottom-0 max-h-[80vh] rounded-t-2xl',
           'md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2',
           'md:w-full md:max-w-md md:rounded-2xl'
@@ -789,7 +789,7 @@ function RuleModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 px-5 py-4 dark:border-gray-700">
+        <div className="border-t border-gray-100 px-5 py-4 modal-footer-safe dark:border-gray-700">
           <div className="flex gap-3">
             <button
               onClick={onClose}

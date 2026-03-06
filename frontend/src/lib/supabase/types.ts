@@ -381,6 +381,216 @@ export interface Database {
           },
         ]
       }
+      budgets: {
+        Row: {
+          id: string
+          user_id: string
+          category_id: string
+          monthly_limit: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          category_id: string
+          monthly_limit: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          category_id?: string
+          monthly_limit?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      savings_goals: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          description: string | null
+          target_amount: number
+          current_amount: number
+          icon: string
+          color: string
+          deadline: string | null
+          is_completed: boolean
+          completed_at: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          description?: string | null
+          target_amount: number
+          current_amount?: number
+          icon?: string
+          color?: string
+          deadline?: string | null
+          is_completed?: boolean
+          completed_at?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          description?: string | null
+          target_amount?: number
+          current_amount?: number
+          icon?: string
+          color?: string
+          deadline?: string | null
+          is_completed?: boolean
+          completed_at?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      achievements: {
+        Row: {
+          id: string
+          user_id: string
+          achievement_type: string
+          name: string
+          description: string
+          icon: string
+          unlocked_at: string
+          data: Json
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          achievement_type: string
+          name: string
+          description: string
+          icon: string
+          unlocked_at?: string
+          data?: Json
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          achievement_type?: string
+          name?: string
+          description?: string
+          icon?: string
+          unlocked_at?: string
+          data?: Json
+        }
+        Relationships: []
+      }
+      savings_streaks: {
+        Row: {
+          id: string
+          user_id: string
+          current_streak: number
+          longest_streak: number
+          last_qualifying_month: string | null
+          monthly_savings_target: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          current_streak?: number
+          longest_streak?: number
+          last_qualifying_month?: string | null
+          monthly_savings_target?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          current_streak?: number
+          longest_streak?: number
+          last_qualifying_month?: string | null
+          monthly_savings_target?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth_key: string
+          user_agent: string | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth_key: string
+          user_agent?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth_key?: string
+          user_agent?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          weekly_summary: boolean
+          budget_alerts: boolean
+          anomaly_alerts: boolean
+          preferred_day: number
+          preferred_hour: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          weekly_summary?: boolean
+          budget_alerts?: boolean
+          anomaly_alerts?: boolean
+          preferred_day?: number
+          preferred_hour?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          weekly_summary?: boolean
+          budget_alerts?: boolean
+          anomaly_alerts?: boolean
+          preferred_day?: number
+          preferred_hour?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -429,3 +639,27 @@ export type ConceptCategoryMapUpdate = Database['public']['Tables']['concept_cat
 export type AssistantConversation = Database['public']['Tables']['assistant_conversations']['Row']
 export type AssistantConversationInsert = Database['public']['Tables']['assistant_conversations']['Insert']
 export type AssistantConversationUpdate = Database['public']['Tables']['assistant_conversations']['Update']
+
+export type Budget = Database['public']['Tables']['budgets']['Row']
+export type BudgetInsert = Database['public']['Tables']['budgets']['Insert']
+export type BudgetUpdate = Database['public']['Tables']['budgets']['Update']
+
+export type SavingsGoal = Database['public']['Tables']['savings_goals']['Row']
+export type SavingsGoalInsert = Database['public']['Tables']['savings_goals']['Insert']
+export type SavingsGoalUpdate = Database['public']['Tables']['savings_goals']['Update']
+
+export type Achievement = Database['public']['Tables']['achievements']['Row']
+export type AchievementInsert = Database['public']['Tables']['achievements']['Insert']
+export type AchievementUpdate = Database['public']['Tables']['achievements']['Update']
+
+export type SavingsStreak = Database['public']['Tables']['savings_streaks']['Row']
+export type SavingsStreakInsert = Database['public']['Tables']['savings_streaks']['Insert']
+export type SavingsStreakUpdate = Database['public']['Tables']['savings_streaks']['Update']
+
+export type PushSubscription = Database['public']['Tables']['push_subscriptions']['Row']
+export type PushSubscriptionInsert = Database['public']['Tables']['push_subscriptions']['Insert']
+export type PushSubscriptionUpdate = Database['public']['Tables']['push_subscriptions']['Update']
+
+export type NotificationPreference = Database['public']['Tables']['notification_preferences']['Row']
+export type NotificationPreferenceInsert = Database['public']['Tables']['notification_preferences']['Insert']
+export type NotificationPreferenceUpdate = Database['public']['Tables']['notification_preferences']['Update']

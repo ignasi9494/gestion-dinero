@@ -13,6 +13,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Inbox,
+  Target,
+  ChevronRight as ChevronRightIcon,
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -44,6 +46,9 @@ import {
   type BalancePoint,
 } from '@/lib/hooks/useDashboard'
 import { useTransactions } from '@/lib/hooks/useTransactions'
+import { BudgetProgress } from './components/budget-progress'
+import { PredictionsSection } from './components/predictions-section'
+import { useSavingsGoals } from '@/lib/hooks/useSavingsGoals'
 
 // ─── Spanish month names ────────────────────────────────────────────
 
@@ -141,6 +146,13 @@ export default function DashboardPage() {
   const { data: salaryData, isLoading: salaryLoading } =
     useSalary(currentMonth)
 
+  // Savings goals (for mini widget)
+  const { data: savingsGoals = [] } = useSavingsGoals()
+  const activeGoals = useMemo(
+    () => savingsGoals.filter((g) => !g.is_completed && g.is_active).slice(0, 3),
+    [savingsGoals]
+  )
+
   // Recent transactions (last 5)
   const { data: recentTxData, isLoading: recentTxLoading } = useTransactions({
     page: 1,
@@ -180,6 +192,60 @@ export default function DashboardPage() {
       {/* ── KPI Cards ─────────────────────────────────────────────── */}
       <KPICards kpis={kpis} isLoading={kpisLoading} />
 
+      {/* ── Budget Progress ─────────────────────────────────────── */}
+      <div className="mt-6">
+        <BudgetProgress month={currentMonth} />
+      </div>
+
+      {/* ── Mini Savings Goals Widget ───────────────────────────── */}
+      {activeGoals.length > 0 && (
+        <div className="mt-6 rounded-xl border border-border/50 bg-card p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Objetivos de ahorro</h2>
+            </div>
+            <Link
+              href="/goals"
+              className="flex items-center gap-0.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Ver todos
+              <ChevronRightIcon className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="space-y-2.5">
+            {activeGoals.map((goal) => {
+              const pct = goal.target_amount > 0
+                ? Math.min((goal.current_amount / goal.target_amount) * 100, 100)
+                : 0
+              return (
+                <div key={goal.id} className="flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="truncate font-medium text-foreground">
+                        {goal.name}
+                      </span>
+                      <span className="ml-2 flex-shrink-0 tabular-nums text-muted-foreground">
+                        {Math.round(pct)}%
+                      </span>
+                    </div>
+                    <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${pct}%`,
+                          backgroundColor: goal.color || '#6366f1',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── Charts Grid ───────────────────────────────────────────── */}
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Gastos por Categoria - Donut */}
@@ -202,6 +268,9 @@ export default function DashboardPage() {
           currentSalary={salaryData}
         />
       </div>
+
+      {/* ── Predictions ─────────────────────────────────────────── */}
+      <PredictionsSection />
 
       {/* ── Recent Transactions ───────────────────────────────────── */}
       <RecentTransactions

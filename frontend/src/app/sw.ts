@@ -100,3 +100,49 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+// ─── Push Notification Handlers ───────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(self as any).addEventListener('push', (event: any) => {
+  if (!event.data) return;
+
+  let data: { title?: string; body?: string; icon?: string; badge?: string; url?: string; tag?: string };
+  try {
+    data = event.data.json();
+  } catch {
+    data = { title: 'GestionDinero', body: event.data.text() };
+  }
+
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/icons/icon-192x192.png',
+    badge: data.badge || '/icons/icon-72x72.png',
+    tag: data.tag || 'gestion-dinero',
+    data: { url: data.url || '/dashboard' },
+    vibrate: [100, 50, 100],
+  } as NotificationOptions & { vibrate?: number[] };
+
+  event.waitUntil(
+    (self as any).registration.showNotification(data.title || 'GestionDinero', options)
+  );
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(self as any).addEventListener('notificationclick', (event: any) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || '/dashboard';
+
+  event.waitUntil(
+    (self as any).clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList: any[]) => {
+      for (const client of clientList) {
+        if (client.url.includes((self as any).location.origin) && 'focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return (self as any).clients.openWindow(url);
+    })
+  );
+});
