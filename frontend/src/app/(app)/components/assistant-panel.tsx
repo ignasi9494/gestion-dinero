@@ -91,11 +91,11 @@ function MiniBarChart({ data, xKey, yKey }: { data: any[]; xKey: string; yKey: s
           />
           <YAxis hide />
           <Tooltip
-            formatter={(v: number) =>
+            formatter={(v) =>
               new Intl.NumberFormat("es-ES", {
                 style: "currency",
                 currency: "EUR",
-              }).format(v)
+              }).format(Number(v))
             }
             contentStyle={{
               fontSize: 11,
@@ -131,11 +131,11 @@ function MiniPieChart({ data }: { data: { name: string; value: number }[] }) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(v: number) =>
+            formatter={(v) =>
               new Intl.NumberFormat("es-ES", {
                 style: "currency",
                 currency: "EUR",
-              }).format(v)
+              }).format(Number(v))
             }
             contentStyle={{ fontSize: 11, borderRadius: 8, border: "none" }}
           />
