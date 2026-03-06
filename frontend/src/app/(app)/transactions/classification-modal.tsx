@@ -198,7 +198,7 @@ export function ClassificationModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/40 transition-opacity"
+        className="fixed inset-0 z-[60] bg-black/40 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -206,7 +206,7 @@ export function ClassificationModal({
       {/* Modal: bottom sheet on mobile, centered on desktop */}
       <div
         className={cn(
-          'fixed z-50 flex flex-col bg-card shadow-2xl',
+          'fixed z-[60] flex flex-col bg-card shadow-2xl',
           // Mobile: bottom sheet
           'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl',
           // Desktop: centered dialog
