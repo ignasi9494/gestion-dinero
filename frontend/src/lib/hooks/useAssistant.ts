@@ -10,8 +10,10 @@ export function useAssistant() {
     messages,
     isLoading,
     isOpen,
+    selectedModel,
     addMessage,
     setLoading,
+    setModel,
     open,
     close,
     toggle,
@@ -44,6 +46,7 @@ export function useAssistant() {
 
         // Build conversation history (last 10 messages)
         const currentMessages = useAssistantStore.getState().messages;
+        const currentModel = useAssistantStore.getState().selectedModel;
         const history = currentMessages.slice(-11, -1).map((m) => ({
           role: m.role,
           content: m.content,
@@ -62,6 +65,7 @@ export function useAssistant() {
               message: text.trim(),
               conversationHistory: history,
               userId: session.user.id,
+              model: currentModel,
             }),
           }
         );
@@ -79,6 +83,7 @@ export function useAssistant() {
           content: data.reply || "No he podido obtener una respuesta.",
           richData: data.richData || null,
           suggestedActions: data.suggestedActions || [],
+          modelUsed: data.modelUsed,
           timestamp: new Date().toISOString(),
         };
         addMessage(assistantMsg);
@@ -101,7 +106,9 @@ export function useAssistant() {
     messages,
     isLoading,
     isOpen,
+    selectedModel,
     sendMessage,
+    setModel,
     open,
     close,
     toggle,

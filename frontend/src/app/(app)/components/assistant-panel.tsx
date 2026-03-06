@@ -10,6 +10,7 @@ import {
   TrendingDown,
   Bot,
   User,
+  ChevronDown,
 } from "lucide-react";
 import { useAssistant } from "@/lib/hooks/useAssistant";
 import { useAssistantStore } from "@/lib/stores/assistant-store";
@@ -18,6 +19,7 @@ import type {
   RichData,
   SuggestedAction,
 } from "@/lib/stores/assistant-store";
+import { AI_MODELS, type AIModel } from "@/lib/stores/assistant-store";
 import {
   BarChart,
   Bar,
@@ -210,6 +212,80 @@ function RichDataRenderer({ data }: { data: RichData }) {
   return null;
 }
 
+// --- Model Selector ---
+
+function ModelSelector({
+  selectedModel,
+  onSelect,
+}: {
+  selectedModel: AIModel;
+  onSelect: (model: AIModel) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = AI_MODELS.find((m) => m.id === selectedModel) ?? AI_MODELS[0];
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground"
+      >
+        <span>{current.icon}</span>
+        <span>{current.label}</span>
+        <ChevronDown
+          className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+          {AI_MODELS.map((model) => (
+            <button
+              key={model.id}
+              onClick={() => {
+                onSelect(model.id);
+                setOpen(false);
+              }}
+              className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-accent ${
+                model.id === selectedModel ? "bg-primary/5" : ""
+              }`}
+            >
+              <span className="text-base">{model.icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-foreground">
+                    {model.label}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {model.costLabel}
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  {model.description}
+                </p>
+              </div>
+              {model.id === selectedModel && (
+                <span className="text-primary text-xs">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // --- Message Bubble ---
 
 function MessageBubble({ msg }: { msg: AssistantMessage }) {
@@ -298,7 +374,7 @@ function WelcomeScreen({
 // --- Main Panel ---
 
 export function AssistantPanel() {
-  const { messages, isLoading, sendMessage, clearMessages } = useAssistant();
+  const { messages, isLoading, sendMessage, clearMessages, selectedModel, setModel } = useAssistant();
   const { isOpen, close } = useAssistantStore();
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -372,6 +448,7 @@ export function AssistantPanel() {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <ModelSelector selectedModel={selectedModel} onSelect={setModel} />
             {messages.length > 0 && (
               <button
                 onClick={clearMessages}
