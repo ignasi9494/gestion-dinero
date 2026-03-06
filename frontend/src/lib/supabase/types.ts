@@ -349,6 +349,38 @@ export interface Database {
           },
         ]
       }
+      assistant_conversations: {
+        Row: {
+          id: string
+          user_id: string
+          messages: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          messages?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          messages?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'assistant_conversations_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -393,3 +425,7 @@ export type MonthlySummaryUpdate = Database['public']['Tables']['monthly_summari
 export type ConceptCategoryMap = Database['public']['Tables']['concept_category_map']['Row']
 export type ConceptCategoryMapInsert = Database['public']['Tables']['concept_category_map']['Insert']
 export type ConceptCategoryMapUpdate = Database['public']['Tables']['concept_category_map']['Update']
+
+export type AssistantConversation = Database['public']['Tables']['assistant_conversations']['Row']
+export type AssistantConversationInsert = Database['public']['Tables']['assistant_conversations']['Insert']
+export type AssistantConversationUpdate = Database['public']['Tables']['assistant_conversations']['Update']

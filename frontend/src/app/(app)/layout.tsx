@@ -11,6 +11,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AssistantFAB } from "./components/assistant-fab";
+import { AssistantPanel } from "./components/assistant-panel";
 
 interface NavItem {
   label: string;
@@ -168,6 +170,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Safe area for devices with home indicator */}
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
+
+      {/* ── AI Assistant ──────────────────────────────────── */}
+      <AssistantFAB />
+      <AssistantPanel />
     </div>
   );
 }
